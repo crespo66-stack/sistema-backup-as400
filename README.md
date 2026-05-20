@@ -1,5 +1,5 @@
 # 🖥️ Sistema Backup AS/400
-Proyecto educativo — SENA, Ficha 3171599 | 2026
+Proyecto educativo — SENA, Ficha 3186677 | 2026
 
 Sistema web para la gestión y monitoreo de backups de journals AS/400 con DB2, incluyendo historial, alertas y configuración de conexiones JDBC.
 
@@ -445,7 +445,7 @@ docker compose down -v
 
 | Nombre | Rol |
 |---|---|
-| Eriks | Desarrollador Full Stack |
+| Guillermo Crespo | Desarrollador Full Stack |
 
-**Programa:** SENA — Ficha 3171599
+**Programa:** SENA — Ficha 3186677
 **Fecha:** 2026
