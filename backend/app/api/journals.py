@@ -1,6 +1,7 @@
 ﻿from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+from sqlalchemy import or_
+from typing import List, Optional
 
 from app.core.database import get_db
 from app.models import Journal, User
@@ -12,27 +13,31 @@ router = APIRouter(prefix="/journals", tags=["Journals"])
 
 @router.get("/", response_model=List[JournalResponse])
 def list_journals(
+    search: Optional[str] = None,
     skip: int = 0,
-    limit: int = 50,
-    active_only: bool = False,
+    limit: int = 200,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    _: User = Depends(get_current_user),
 ):
     query = db.query(Journal)
-    if current_user.role not in ["admin"]:
-        query = query.filter(Journal.owner_id == current_user.id)
-    if active_only:
-        query = query.filter(Journal.is_active == True)
-    return query.offset(skip).limit(limit).all()
+    if search:
+        like = f"%{search}%"
+        query = query.filter(or_(
+            Journal.name.ilike(like),
+            Journal.library.ilike(like),
+            Journal.type.ilike(like),
+            Journal.current_receiver.ilike(like),
+        ))
+    return query.order_by(Journal.id.desc()).offset(skip).limit(limit).all()
 
 
 @router.post("/", response_model=JournalResponse, status_code=201)
 def create_journal(
     journal_in: JournalCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_operator),
+    _: User = Depends(require_operator),
 ):
-    journal = Journal(**journal_in.model_dump(), owner_id=current_user.id)
+    journal = Journal(**journal_in.model_dump())
     db.add(journal)
     db.commit()
     db.refresh(journal)
@@ -43,13 +48,11 @@ def create_journal(
 def get_journal(
     journal_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    _: User = Depends(get_current_user),
 ):
     journal = db.query(Journal).filter(Journal.id == journal_id).first()
     if not journal:
         raise HTTPException(status_code=404, detail="Journal no encontrado")
-    if current_user.role != "admin" and journal.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Sin permisos")
     return journal
 
 
@@ -58,14 +61,11 @@ def update_journal(
     journal_id: int,
     journal_in: JournalUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_operator),
+    _: User = Depends(require_operator),
 ):
     journal = db.query(Journal).filter(Journal.id == journal_id).first()
     if not journal:
         raise HTTPException(status_code=404, detail="Journal no encontrado")
-    if current_user.role != "admin" and journal.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Sin permisos")
-
     for field, value in journal_in.model_dump(exclude_unset=True).items():
         setattr(journal, field, value)
     db.commit()
@@ -77,13 +77,11 @@ def update_journal(
 def delete_journal(
     journal_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_operator),
+    _: User = Depends(require_operator),
 ):
     journal = db.query(Journal).filter(Journal.id == journal_id).first()
     if not journal:
         raise HTTPException(status_code=404, detail="Journal no encontrado")
-    if current_user.role != "admin" and journal.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Sin permisos")
     db.delete(journal)
     db.commit()
     return {"message": "Journal eliminado"}

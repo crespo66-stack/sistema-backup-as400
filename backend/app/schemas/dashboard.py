@@ -1,23 +1,18 @@
 from pydantic import BaseModel
-from typing import Optional
-from datetime import datetime
+from typing import List
+
+from app.schemas.backup import BackupResponse
+
+
+class JournalTypeCount(BaseModel):
+    type:  str
+    count: int
 
 
 class DashboardStats(BaseModel):
-    # Journals
-    total_journals:  int
-    active_journals: int
-
-    # Backups
-    total_backups:      int
-    successful_backups: int
-    failed_backups:     int
-    running_backups:    int
-    success_rate:       float
-
-    # Alertas
-    pending_alerts:  int
-    critical_alerts: int
-
-    # Último backup exitoso
-    last_backup_at: Optional[datetime]
+    total_journals:   int      # Journals totales
+    active_journals:  int      # Journals activos
+    total_storage_mb: float    # Almacenamiento (suma de tamaños)
+    total_users:      int      # Usuarios registrados
+    journals_by_type: List[JournalTypeCount]   # Gráfico "Journals por Tipo"
+    recent_activity:  List[BackupResponse]     # "Actividad Reciente" (últimas 5)

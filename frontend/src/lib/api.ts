@@ -86,17 +86,17 @@ export const dashboardApi = {
 };
 
 export const journalsApi = {
-  list: (params?: any) => api.get("/journals", { params }),
+  list: (params?: any) => api.get("/journals/", { params }),
   get: (id: number) => api.get(`/journals/${id}`),
-  create: (data: any) => api.post("/journals", data),
+  create: (data: any) => api.post("/journals/", data),
   update: (id: number, data: any) => api.patch(`/journals/${id}`, data),
   delete: (id: number) => api.delete(`/journals/${id}`),
 };
 
 export const backupsApi = {
-  list: (params?: any) => api.get("/backups", { params }),
+  list: (params?: any) => api.get("/backups/", { params }),
   get: (id: number) => api.get(`/backups/${id}`),
-  create: (journal_id: number) => api.post("/backups", { journal_id }),
+  create: (data: any) => api.post("/backups/", data),
   delete: (id: number) => api.delete(`/backups/${id}`),
 };
 
@@ -119,9 +119,9 @@ export const connectionsApi = {
 };
 
 export const usersApi = {
-  list: () => api.get("/users"),
+  list: (params?: any) => api.get("/users/", { params }),
   get: (id: number) => api.get(`/users/${id}`),
-  create: (data: any) => api.post("/users", data),
+  create: (data: any) => api.post("/users/", data),
   update: (id: number, data: any) => api.patch(`/users/${id}`, data),
   delete: (id: number) => api.delete(`/users/${id}`),
 };

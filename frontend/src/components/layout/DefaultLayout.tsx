@@ -10,7 +10,7 @@ import clsx from "clsx";
 const navItems = [
   { to: "/dashboard",    label: "Dashboard",   icon: LayoutDashboard },
   { to: "/journals",     label: "Journals",    icon: BookOpen },
-  { to: "/history",      label: "Historial",   icon: History },
+  { to: "/history",      label: "Historial Backups", icon: History },
   { to: "/alerts",       label: "Alertas",     icon: Bell },
   { to: "/settings",     label: "Configuración", icon: Settings },
 ];

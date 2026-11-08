@@ -1,6 +1,11 @@
-﻿export type UserRole = "admin" | "operator" | "viewer";
-export type BackupStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
+﻿export type UserRole = "admin" | "operator" | "dba" | "auditor";
 export type AlertSeverity = "info" | "warning" | "error" | "critical";
+
+export type JournalType = "System" | "Audit" | "Application" | "Security";
+export type JournalStatus = "activo" | "respaldado" | "inactivo";
+export type JournalPriority = "alta" | "media" | "baja";
+export type OperationType = "Backup Completo" | "Backup Incremental" | "Restauracion";
+export type BackupResult = "exitoso" | "fallido";
 
 export interface User {
   id: number;
@@ -16,29 +21,27 @@ export interface User {
 export interface Journal {
   id: number;
   name: string;
-  description?: string;
   library: string;
-  journal_name: string;
-  connection_id: number;
-  owner_id: number;
-  is_active: boolean;
-  schedule_cron?: string;
-  retention_days: number;
+  type: JournalType;
+  status: JournalStatus;
+  priority: JournalPriority;
+  size_mb: number;
+  current_receiver?: string | null;
+  as400_created_at?: string | null;
+  description?: string | null;
   created_at: string;
-  updated_at?: string;
 }
 
+// Historial de backups
 export interface Backup {
   id: number;
-  journal_id: number;
-  created_by: number;
-  status: BackupStatus;
-  started_at?: string;
-  completed_at?: string;
-  file_path?: string;
-  file_size_bytes?: number;
-  records_count?: number;
-  error_message?: string;
+  journal_name: string;
+  operation_type: OperationType;
+  result: BackupResult;
+  size_mb?: number | null;
+  duration_seconds?: number | null;
+  executed_by?: string | null;
+  notes?: string | null;
   created_at: string;
 }
 
@@ -73,12 +76,10 @@ export interface AS400Connection {
 export interface DashboardStats {
   total_journals: number;
   active_journals: number;
-  total_backups: number;
-  successful_backups: number;
-  failed_backups: number;
-  pending_alerts: number;
-  last_backup_at?: string;
-  success_rate: number;
+  total_storage_mb: number;
+  total_users: number;
+  journals_by_type: { type: string; count: number }[];
+  recent_activity: Backup[];
 }
 
 export interface Token {

@@ -1,4 +1,4 @@
-﻿from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum as SAEnum
+﻿from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import enum
@@ -7,9 +7,10 @@ from app.core.database import Base
 
 
 class UserRole(str, enum.Enum):
-    admin    = "admin"
-    operator = "operator"
-    viewer   = "viewer"
+    admin    = "admin"      # Administrador
+    operator = "operator"   # Operador
+    dba      = "dba"        # DBA
+    auditor  = "auditor"    # Auditor
 
 
 class User(Base):
@@ -20,7 +21,7 @@ class User(Base):
     username           = Column(String(100), unique=True, index=True, nullable=False)
     full_name          = Column(String(255), nullable=False)
     hashed_password    = Column(String(255), nullable=False)
-    role               = Column(SAEnum(UserRole), default=UserRole.operator, nullable=False)
+    role               = Column(String(20), default="operator", nullable=False)
     is_active          = Column(Boolean, default=True)
     is_verified        = Column(Boolean, default=False)
     avatar_url         = Column(String(500), nullable=True)
@@ -33,5 +34,4 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relaciones
-    journals = relationship("Journal", back_populates="owner")
-    backups  = relationship("Backup",  back_populates="created_by_user")
+    backups = relationship("Backup", back_populates="created_by_user")

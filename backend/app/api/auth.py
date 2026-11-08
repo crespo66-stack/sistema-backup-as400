@@ -10,7 +10,7 @@ from app.core.security import (
 )
 from app.models.user import User
 from app.schemas import (
-    Token, LoginRequest, UserCreate, UserResponse,
+    Token, LoginRequest, RegisterRequest, UserResponse,
     RefreshTokenRequest, PasswordResetRequest, PasswordResetConfirm,
 )
 from app.api.deps import get_current_user
@@ -19,8 +19,9 @@ router = APIRouter(prefix="/auth", tags=["Autenticación"])
 
 
 @router.post("/register", response_model=UserResponse, status_code=201)
-def register(user_in: UserCreate, db: Session = Depends(get_db)):
-    """Registrar nuevo usuario."""
+def register(user_in: RegisterRequest, db: Session = Depends(get_db)):
+    """Registro público. Siempre crea el usuario con el rol de menor permiso (auditor).
+    Un administrador puede cambiar el rol luego desde la pantalla Usuarios."""
     if db.query(User).filter(User.email == user_in.email).first():
         raise HTTPException(status_code=400, detail="El email ya está registrado")
     if db.query(User).filter(User.username == user_in.username).first():
@@ -31,7 +32,8 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
         username=user_in.username,
         full_name=user_in.full_name,
         hashed_password=get_password_hash(user_in.password),
-        role=user_in.role,
+        role="auditor",
+        is_active=True,
         is_verified=True,
     )
     db.add(user)

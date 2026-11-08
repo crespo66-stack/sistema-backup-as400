@@ -1,15 +1,17 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from sqlalchemy import func, desc
 
 from app.core.database import get_db
 from app.models.user    import User
 from app.models.journal import Journal
-from app.models.backup  import Backup, BackupStatus
-from app.models.alert   import Alert, AlertSeverity
-from app.schemas.dashboard import DashboardStats
+from app.models.backup  import Backup
+from app.schemas.dashboard import DashboardStats, JournalTypeCount
 from app.api.deps import get_current_user
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
+
+JOURNAL_TYPES = ["Audit", "System", "Application", "Security"]
 
 
 @router.get("/stats", response_model=DashboardStats)
@@ -17,39 +19,23 @@ def get_stats(
     db: Session = Depends(get_db),
     _: User = Depends(get_current_user),
 ):
-    """KPIs principales del dashboard."""
+    """Datos del Panel de Control."""
     total_journals  = db.query(Journal).count()
-    active_journals = db.query(Journal).filter(Journal.is_active == True).count()
+    active_journals = db.query(Journal).filter(Journal.status == "activo").count()
+    total_storage   = db.query(func.coalesce(func.sum(Journal.size_mb), 0)).scalar()
+    total_users     = db.query(User).count()
 
-    total_backups   = db.query(Backup).count()
-    successful      = db.query(Backup).filter(Backup.status == BackupStatus.completed).count()
-    failed          = db.query(Backup).filter(Backup.status == BackupStatus.failed).count()
-    running         = db.query(Backup).filter(Backup.status == BackupStatus.running).count()
+    counts = dict(db.query(Journal.type, func.count(Journal.id)).group_by(Journal.type).all())
+    by_type = [JournalTypeCount(type=t, count=counts.pop(t, 0)) for t in JOURNAL_TYPES]
+    by_type += [JournalTypeCount(type=t, count=c) for t, c in counts.items()]  # tipos no previstos
 
-    pending_alerts  = db.query(Alert).filter(Alert.is_read == False).count()
-    critical_alerts = db.query(Alert).filter(
-        Alert.severity == AlertSeverity.critical,
-        Alert.is_resolved == False,
-    ).count()
-
-    last_backup = (
-        db.query(Backup)
-        .filter(Backup.status == BackupStatus.completed)
-        .order_by(Backup.completed_at.desc())
-        .first()
-    )
-
-    success_rate = round((successful / total_backups * 100), 2) if total_backups > 0 else 0.0
+    recent = db.query(Backup).order_by(desc(Backup.created_at), desc(Backup.id)).limit(5).all()
 
     return DashboardStats(
         total_journals=total_journals,
         active_journals=active_journals,
-        total_backups=total_backups,
-        successful_backups=successful,
-        failed_backups=failed,
-        running_backups=running,
-        success_rate=success_rate,
-        pending_alerts=pending_alerts,
-        critical_alerts=critical_alerts,
-        last_backup_at=last_backup.completed_at if last_backup else None,
+        total_storage_mb=round(float(total_storage), 1),
+        total_users=total_users,
+        journals_by_type=by_type,
+        recent_activity=recent,
     )

@@ -8,6 +8,16 @@ class Token(BaseModel):
     token_type:    str = "bearer"
 
 
+# ── Registro público ─────────────────────────────────────
+# Nota: NO incluye "role" ni "is_active". Quien se registra solo por
+# su cuenta recibe siempre el rol de menor permiso (auditor, solo lectura).
+class RegisterRequest(BaseModel):
+    email:     EmailStr
+    username:  str = Field(..., min_length=3, max_length=50)
+    full_name: str = Field(..., min_length=2)
+    password:  str = Field(..., min_length=8)
+
+
 # ── Login ────────────────────────────────────────────────
 class LoginRequest(BaseModel):
     email:    EmailStr

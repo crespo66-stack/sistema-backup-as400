@@ -1,34 +1,31 @@
-﻿from pydantic import BaseModel
-from typing import Optional
+﻿from pydantic import BaseModel, Field
+from typing import Optional, Literal
 from datetime import datetime
-from enum import Enum
 
-
-class BackupStatus(str, Enum):
-    pending   = "pending"
-    running   = "running"
-    completed = "completed"
-    failed    = "failed"
-    cancelled = "cancelled"
+OperationType = Literal["Backup Completo", "Backup Incremental", "Restauracion"]
+BackupResult  = Literal["exitoso", "fallido"]
 
 
 class BackupCreate(BaseModel):
-    journal_id: int
+    journal_name:     str = Field(..., min_length=1, max_length=255)
+    operation_type:   OperationType = "Backup Completo"
+    result:           BackupResult = "exitoso"
+    size_mb:          Optional[float] = Field(None, ge=0)
+    duration_seconds: Optional[int] = Field(None, ge=0)
+    executed_by:      Optional[str] = None
+    notes:            Optional[str] = None
 
 
 class BackupResponse(BaseModel):
-    id:              int
-    journal_id:      int
-    created_by:      int
-    status:          BackupStatus
-    receiver:        Optional[str]
-    started_at:      Optional[datetime]
-    completed_at:    Optional[datetime]
-    file_path:       Optional[str]
-    file_size_bytes: Optional[int]
-    records_count:   Optional[int]
-    error_message:   Optional[str]
-    created_at:      datetime
+    id:               int
+    journal_name:     str
+    operation_type:   str
+    result:           str
+    size_mb:          Optional[float]
+    duration_seconds: Optional[int]
+    executed_by:      Optional[str]
+    notes:            Optional[str]
+    created_at:       datetime
 
     class Config:
         from_attributes = True

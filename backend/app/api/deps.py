@@ -42,9 +42,9 @@ def require_admin(current_user: User = Depends(get_current_user)) -> User:
 
 
 def require_operator(current_user: User = Depends(get_current_user)) -> User:
-    if current_user.role not in [UserRole.admin, UserRole.operator]:
+    if current_user.role not in [UserRole.admin, UserRole.operator, UserRole.dba]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Se requieren permisos de operador o superior",
+            detail="Tu rol no tiene permisos para modificar datos",
         )
     return current_user

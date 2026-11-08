@@ -1,7 +1,7 @@
 # 🖥️ Sistema Backup AS/400
 Proyecto educativo — SENA, Ficha 3186677 | 2026
 
-Sistema web para la gestión y monitoreo de backups de journals AS/400 con DB2, incluyendo historial, alertas y configuración de conexiones JDBC.
+Sistema web para la gestión y el registro de backups de journals AS/400 (IBM iSeries), con historial de operaciones, alertas automáticas, gestión de usuarios y configuración de conexiones.
 
 ---
 
@@ -12,6 +12,7 @@ Sistema web para la gestión y monitoreo de backups de journals AS/400 con DB2, 
 - [Prerrequisitos](#prerrequisitos)
 - [Instalación y Setup](#instalación-y-setup)
 - [Ejecución](#ejecución)
+- [Datos de ejemplo](#datos-de-ejemplo)
 - [Estructura del Proyecto](#estructura-del-proyecto)
 - [Endpoints de la API](#endpoints-de-la-api)
 - [Roles de Usuario](#roles-de-usuario)
@@ -21,15 +22,18 @@ Sistema web para la gestión y monitoreo de backups de journals AS/400 con DB2, 
 
 ## 📖 Descripción del Proyecto
 
-**Sistema Backup AS/400** es una plataforma web empresarial diseñada para:
+**Sistema Backup AS/400** es una plataforma web diseñada para:
 
-- 📂 **Gestionar journals** de AS/400 con operaciones CRUD completas
-- 🔄 **Ejecutar y monitorear backups** de forma manual o programada
-- 📊 **Dashboard administrativo** con KPIs en tiempo real
-- 🔔 **Sistema de alertas** para backups fallidos, errores de conexión y journals inactivos
-- ⚙️ **Configurar conexiones** AS/400 / DB2 de forma segura
-- 👥 **Gestión de usuarios** con roles diferenciados (Admin, Operador, Viewer)
+- 📊 **Panel de Control (Dashboard)** con indicadores: journals totales, journals activos, almacenamiento, usuarios registrados, gráfico de journals por tipo y actividad reciente
+- 📂 **Gestionar journals** del AS/400 (nombre, biblioteca, tipo, estado, prioridad, tamaño, receptor actual) con buscador y operaciones de crear, editar y eliminar
+- 🔄 **Historial de Backups**: registro de operaciones (backup completo, incremental y restauración) con resultado, tamaño, duración y responsable
+- 🔗 **Relación Journals ↔ Historial**: cada operación se registra sobre un journal existente; un backup exitoso marca el journal como *respaldado*
+- 🔔 **Alertas automáticas**: un backup fallido genera una alerta de forma automática
+- ⚙️ **Configurar conexiones** AS/400 / DB2
+- 👥 **Gestión de usuarios** con roles diferenciados (Administrador, Operador, DBA, Auditor)
 - 🔐 **Autenticación JWT** con refresh tokens y recuperación de contraseña
+
+> ℹ️ Las operaciones de backup se **registran** manualmente en el sistema; este proyecto no ejecuta backups reales sobre un AS/400.
 
 ---
 
@@ -80,8 +84,8 @@ Sistema web para la gestión y monitoreo de backups de journals AS/400 con DB2, 
 |---|---|
 | `users` | Usuarios del sistema con roles |
 | `as400_connections` | Conexiones configuradas al AS/400 / DB2 |
-| `journals` | Journals registrados para backup |
-| `backups` | Historial completo de backups ejecutados |
+| `journals` | Journals del AS/400 registrados en el sistema |
+| `backups` | Historial de operaciones de backup / restauración |
 | `alerts` | Alertas del sistema (errores, advertencias) |
 
 ### Tabla `users`
@@ -91,33 +95,44 @@ Sistema web para la gestión y monitoreo de backups de journals AS/400 con DB2, 
 | email | VARCHAR(255) | Correo electrónico (único) |
 | username | VARCHAR(100) | Nombre de usuario (único) |
 | full_name | VARCHAR(255) | Nombre completo |
-| hashed_password | VARCHAR(255) | Contraseña hasheada |
-| role | ENUM | admin / operator / viewer |
+| hashed_password | VARCHAR(255) | Contraseña hasheada (bcrypt) |
+| role | VARCHAR(20) | `admin` / `operator` / `dba` / `auditor` |
 | is_active | BOOLEAN | Estado de la cuenta |
+| created_at | TIMESTAMP | Fecha de registro |
 
 ### Tabla `journals`
 | Columna | Tipo | Descripción |
 |---|---|---|
 | id | INTEGER (PK) | Identificador único |
-| name | VARCHAR(255) | Nombre del journal |
-| library | VARCHAR(255) | Library AS/400 |
-| journal_name | VARCHAR(255) | Nombre del journal en AS/400 |
-| connection_id | FK | Conexión AS/400 asociada |
-| is_active | BOOLEAN | Estado del journal |
-| schedule_cron | VARCHAR(100) | Programación automática |
-| retention_days | INTEGER | Días de retención del backup |
+| name | VARCHAR(255) | Nombre del journal (ej. QAUDJRN) |
+| library | VARCHAR(255) | Biblioteca AS/400 (ej. QSYS) |
+| type | VARCHAR(30) | `System` / `Audit` / `Application` / `Security` |
+| status | VARCHAR(20) | `activo` / `respaldado` / `inactivo` |
+| priority | VARCHAR(20) | `alta` / `media` / `baja` |
+| size_mb | NUMERIC(12,1) | Tamaño en MB |
+| current_receiver | VARCHAR(255) | Receptor actual (ej. RCVR0001) |
+| as400_created_at | DATE | Fecha de creación en el AS/400 |
+| description | TEXT | Notas del journal |
 
-### Tabla `backups`
+### Tabla `backups` (Historial)
 | Columna | Tipo | Descripción |
 |---|---|---|
 | id | INTEGER (PK) | Identificador único |
-| journal_id | FK | Journal asociado |
-| status | ENUM | pending/running/completed/failed/cancelled |
-| receiver | VARCHAR(255) | Receiver del backup AS/400 |
-| started_at | TIMESTAMP | Inicio del backup |
-| completed_at | TIMESTAMP | Fin del backup |
-| records_count | INTEGER | Registros procesados |
-| error_message | TEXT | Mensaje de error si falló |
+| journal_name | VARCHAR(255) | Journal sobre el que se hizo la operación |
+| operation_type | VARCHAR(30) | `Backup Completo` / `Backup Incremental` / `Restauracion` |
+| result | VARCHAR(20) | `exitoso` / `fallido` |
+| size_mb | NUMERIC(12,1) | Tamaño del respaldo en MB |
+| duration_seconds | INTEGER | Duración en segundos |
+| executed_by | VARCHAR(255) | Nombre de quien ejecutó la operación |
+| notes | TEXT | Notas |
+| created_by | FK → users | Usuario que registró la operación |
+| created_at | TIMESTAMP | Fecha de la operación |
+
+### Reglas de negocio
+- Un backup **exitoso** (completo o incremental) cambia el journal de `activo` a `respaldado`.
+- Un backup **fallido** crea automáticamente una alerta de tipo `backup_failed`.
+- Las restauraciones y los backups fallidos **no** cambian el estado del journal.
+- No se puede registrar una operación sobre un journal que no existe.
 
 ---
 
@@ -171,7 +186,7 @@ docker compose up -d
 
 Esto levanta automáticamente:
 - 🐘 PostgreSQL con todas las tablas creadas
-- 🐍 FastAPI con el usuario admin creado
+- 🐍 FastAPI con el usuario admin y los datos de ejemplo creados
 - 📄 Script SQL inicial ejecutado
 
 ### 4. Instalar dependencias del Frontend
@@ -237,6 +252,26 @@ curl http://localhost:8000/health
 
 ---
 
+## 🧪 Datos de ejemplo
+
+Al iniciar por primera vez (base de datos vacía), el backend carga datos de demostración:
+
+- **7 journals** (`@journal`, `AUDJRN02`, `QSYSJRN`, `QAUDJRN`, `APPJRN01`, `SECJRN01`, `APPJRN02`)
+- **5 operaciones** en el Historial de Backups
+- **6 usuarios** con roles Operador, DBA y Auditor
+
+Todos los usuarios de ejemplo tienen la contraseña `Usuario123!` (por ejemplo `gcrespo@empresa.com`).
+
+> ⚠️ Cambia o elimina estas cuentas antes de usar el sistema fuera de un entorno de pruebas.
+
+Para reiniciar la base de datos desde cero (se vuelven a cargar los datos de ejemplo):
+```bash
+docker compose down -v
+docker compose up -d
+```
+
+---
+
 ## 📁 Estructura del Proyecto
 
 ```
@@ -244,7 +279,7 @@ sistema-backup-as400/
 │
 ├── backend/                        # API FastAPI + Python
 │   ├── app/
-│   │   ├── main.py                 # Punto de entrada FastAPI
+│   │   ├── main.py                 # Punto de entrada FastAPI + datos de ejemplo
 │   │   ├── core/
 │   │   │   ├── config.py           # Configuración y variables de entorno
 │   │   │   ├── database.py         # Conexión a PostgreSQL
@@ -281,14 +316,16 @@ sistema-backup-as400/
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── common/             # Componentes reutilizables
+│   │   │   ├── ui/                 # Modal y menú de acciones (RowMenu)
 │   │   │   └── layout/             # Layout principal con sidebar
 │   │   ├── features/
 │   │   │   ├── auth/               # Login, Registro, Recuperar contraseña
-│   │   │   ├── dashboard/          # KPIs y gráficas
-│   │   │   ├── journals/           # CRUD journals
+│   │   │   ├── dashboard/          # Panel de Control (KPIs y gráfica)
+│   │   │   ├── journals/           # Gestión de journals
 │   │   │   ├── history/            # Historial de backups
 │   │   │   ├── alerts/             # Sistema de alertas
-│   │   │   └── settings/           # Configuración AS/400
+│   │   │   ├── settings/           # Configuración AS/400
+│   │   │   └── users/              # Gestión de usuarios (solo Administrador)
 │   │   ├── lib/
 │   │   │   └── api.ts              # Cliente HTTP con interceptores JWT
 │   │   ├── store/
@@ -327,7 +364,7 @@ sistema-backup-as400/
 ### Autenticación (`/auth`)
 | Método | Ruta | Descripción | Auth |
 |---|---|---|---|
-| POST | `/auth/register` | Registrar usuario | No |
+| POST | `/auth/register` | Registrar usuario (siempre con rol Auditor) | No |
 | POST | `/auth/login` | Iniciar sesión | No |
 | POST | `/auth/refresh` | Renovar access token | No |
 | POST | `/auth/forgot-password` | Solicitar recuperación | No |
@@ -337,19 +374,30 @@ sistema-backup-as400/
 ### Journals (`/journals`)
 | Método | Ruta | Descripción | Auth |
 |---|---|---|---|
-| GET | `/journals` | Listar journals | Sí |
-| POST | `/journals` | Crear journal | Sí |
+| GET | `/journals?search=` | Listar y buscar journals | Sí |
+| POST | `/journals` | Crear journal | Admin / Operador / DBA |
 | GET | `/journals/{id}` | Ver journal | Sí |
-| PATCH | `/journals/{id}` | Editar journal | Sí |
-| DELETE | `/journals/{id}` | Eliminar journal | Sí |
+| PATCH | `/journals/{id}` | Editar journal | Admin / Operador / DBA |
+| DELETE | `/journals/{id}` | Eliminar journal | Admin / Operador / DBA |
 
-### Backups (`/backups`)
+### Historial de Backups (`/backups`)
 | Método | Ruta | Descripción | Auth |
 |---|---|---|---|
-| GET | `/backups` | Historial de backups | Sí |
-| POST | `/backups` | Iniciar backup | Sí |
-| GET | `/backups/{id}` | Ver backup | Sí |
-| DELETE | `/backups/{id}` | Eliminar registro | Sí |
+| GET | `/backups?search=` | Historial de operaciones | Sí |
+| POST | `/backups` | Registrar operación (actualiza el journal y crea alerta si falla) | Admin / Operador / DBA |
+| GET | `/backups/{id}` | Ver operación | Sí |
+| DELETE | `/backups/{id}` | Eliminar registro | Admin / Operador / DBA |
+
+### Usuarios (`/users`)
+| Método | Ruta | Descripción | Auth |
+|---|---|---|---|
+| GET | `/users?search=` | Listar y buscar usuarios | Admin |
+| POST | `/users` | Registrar usuario | Admin |
+| GET | `/users/{id}` | Ver usuario | Admin o el mismo usuario |
+| PATCH | `/users/{id}` | Editar usuario (rol, estado, contraseña) | Admin o el mismo usuario* |
+| DELETE | `/users/{id}` | Eliminar usuario | Admin |
+
+\* Solo un Administrador puede cambiar rol o estado. Nadie puede eliminarse ni desactivarse a sí mismo.
 
 ### Alertas (`/alerts`)
 | Método | Ruta | Descripción | Auth |
@@ -372,29 +420,25 @@ sistema-backup-as400/
 ### Dashboard (`/dashboard`)
 | Método | Ruta | Descripción | Auth |
 |---|---|---|---|
-| GET | `/dashboard/stats` | KPIs del sistema | Sí |
+| GET | `/dashboard/stats` | Indicadores, journals por tipo y actividad reciente | Sí |
 
 ---
 
 ## 👥 Roles de Usuario
 
-### Admin
-- CRUD completo de journals
+### Administrador (`admin`)
+- Todo lo que pueden hacer los demás roles
+- Gestión de usuarios (crear, editar, activar/desactivar, eliminar)
 - Gestión de conexiones AS/400
-- Ver y gestionar alertas
-- Ver historial de backups
-- Gestión de usuarios
 
-### Operator
-- Ver dashboard
-- Ver y ejecutar backups
-- Ver historial
-- Ver alertas
+### Operador (`operator`) y DBA (`dba`)
+- Ver Dashboard, Journals, Historial y Alertas
+- Crear, editar y eliminar journals
+- Registrar operaciones en el Historial de Backups
 
-### Viewer
-- Ver dashboard
-- Ver historial
-- Ver alertas (solo lectura)
+### Auditor (`auditor`)
+- Ver Dashboard, Journals, Historial y Alertas (solo lectura)
+- Es el rol que reciben las cuentas creadas desde el registro público
 
 ---
 
@@ -403,7 +447,8 @@ sistema-backup-as400/
 - Contraseñas hasheadas con **bcrypt** — nunca en texto plano
 - Autenticación con **JWT** (Access Token 60 min + Refresh Token 7 días)
 - Renovación automática de tokens en el frontend
-- Rutas protegidas por rol en el backend
+- Rutas protegidas por rol en el backend y en el frontend
+- El registro público **no permite elegir el rol**: siempre crea cuentas de solo lectura
 - **CORS** configurado solo para `http://localhost:5173`
 
 ---
@@ -448,4 +493,3 @@ docker compose down -v
 | Guillermo Crespo | Desarrollador Full Stack |
 
 **Programa:** SENA — Ficha 3186677
-**Fecha:** 2026

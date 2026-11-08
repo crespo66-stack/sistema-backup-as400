@@ -12,12 +12,19 @@ import JournalsPage from "../features/journals/JournalsPage";
 import HistoryPage from "../features/history/HistoryPage";
 import AlertsPage from "../features/alerts/AlertsPage";
 import SettingsPage from "../features/settings/SettingsPage";
+import UsersPage from "../features/users/UsersPage";
 import HomePage from "../pages/HomePage";
 
 // Route guard
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+}
+
+// Solo el Administrador puede entrar a Usuarios
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const role = useAuthStore((s) => s.user?.role);
+  return role === "admin" ? <>{children}</> : <Navigate to="/dashboard" replace />;
 }
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
@@ -58,6 +65,7 @@ export default function AppRoutes() {
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/alerts" element={<AlertsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/users" element={<AdminRoute><UsersPage /></AdminRoute>} />
         </Route>
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

@@ -1,46 +1,48 @@
 ﻿from pydantic import BaseModel, Field
-from typing import Optional
-from datetime import datetime
+from typing import Optional, Literal
+from datetime import datetime, date
+
+JournalType     = Literal["System", "Audit", "Application", "Security"]
+JournalStatus   = Literal["activo", "respaldado", "inactivo"]
+JournalPriority = Literal["alta", "media", "baja"]
 
 
 class JournalCreate(BaseModel):
-    name:           str = Field(..., min_length=2)
-    description:    Optional[str] = None
-    library:        str
-    journal_name:   str
-    connection_id:  int
-    schedule_cron:  Optional[str] = None
-    retention_days: int = 30
-    extra_config:   Optional[dict] = None
+    name:             str = Field(..., min_length=1, max_length=255)
+    library:          str = Field(..., min_length=1, max_length=255)
+    type:             JournalType = "System"
+    status:           JournalStatus = "activo"
+    priority:         JournalPriority = "media"
+    size_mb:          float = Field(0, ge=0)
+    current_receiver: Optional[str] = None
+    as400_created_at: Optional[date] = None
+    description:      Optional[str] = None
 
 
 class JournalUpdate(BaseModel):
-    name:           Optional[str]  = None
-    description:    Optional[str]  = None
-    library:        Optional[str]  = None
-    journal_name:   Optional[str]  = None
-    connection_id:  Optional[int]  = None
-    is_active:      Optional[bool] = None
-    schedule_cron:  Optional[str]  = None
-    retention_days: Optional[int]  = None
-    extra_config:   Optional[dict] = None
+    name:             Optional[str] = Field(None, min_length=1, max_length=255)
+    library:          Optional[str] = Field(None, min_length=1, max_length=255)
+    type:             Optional[JournalType] = None
+    status:           Optional[JournalStatus] = None
+    priority:         Optional[JournalPriority] = None
+    size_mb:          Optional[float] = Field(None, ge=0)
+    current_receiver: Optional[str] = None
+    as400_created_at: Optional[date] = None
+    description:      Optional[str] = None
 
 
 class JournalResponse(BaseModel):
-    id:                 int
-    name:               str
-    description:        Optional[str]
-    library:            str
-    journal_name:       str
-    connection_id:      int
-    owner_id:           int
-    is_active:          bool
-    schedule_cron:      Optional[str]
-    retention_days:     int
-    last_backup_at:     Optional[datetime]
-    last_backup_status: Optional[str]
-    created_at:         datetime
-    updated_at:         Optional[datetime]
+    id:               int
+    name:             str
+    library:          str
+    type:             str
+    status:           str
+    priority:         str
+    size_mb:          float
+    current_receiver: Optional[str]
+    as400_created_at: Optional[date]
+    description:      Optional[str]
+    created_at:       datetime
 
     class Config:
         from_attributes = True
