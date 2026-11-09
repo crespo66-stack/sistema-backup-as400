@@ -7,8 +7,8 @@ from app.core.config import settings
 engine = create_engine(
     settings.DATABASE_URL,
     pool_pre_ping=True,   # Verifica conexión antes de usarla
-    pool_size=10,         # Conexiones simultáneas en el pool
-    max_overflow=20,      # Conexiones extra permitidas
+    pool_size=5,          # Conexiones simultáneas en el pool
+    max_overflow=5,       # Conexiones extra permitidas
     echo=settings.DEBUG,  # Imprime SQL en consola si DEBUG=True
 )
 

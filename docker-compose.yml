@@ -25,7 +25,7 @@ services:
     container_name: backup_as400_api
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/backup_as400
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@db:5432/backup_as400}
       SECRET_KEY: ${SECRET_KEY:-supersecretkey-change-in-production}
       DEBUG: ${DEBUG:-true}
       FRONTEND_URL: http://localhost:5173
