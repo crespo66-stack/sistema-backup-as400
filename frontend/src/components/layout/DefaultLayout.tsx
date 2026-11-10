@@ -2,10 +2,11 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, BookOpen, History, Bell,
-  Settings, Users, LogOut, Menu, X, Database, ChevronRight,
+  Settings, Users, LogOut, Menu, X, ChevronRight,
 } from "lucide-react";
 import { useAuthStore } from "../../store";
 import clsx from "clsx";
+import Logo from "../ui/Logo";
 
 const navItems = [
   { to: "/dashboard",    label: "Dashboard",   icon: LayoutDashboard },
@@ -36,16 +37,8 @@ export default function DefaultLayout() {
         )}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 px-4 py-5 border-b border-surface-border">
-          <div className="flex-shrink-0 w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center">
-            <Database size={16} className="text-white" />
-          </div>
-          {sidebarOpen && (
-            <div className="overflow-hidden">
-              <p className="text-sm font-semibold text-white truncate">AS/400 Backup</p>
-              <p className="text-xs text-slate-500 truncate">Sistema de respaldo</p>
-            </div>
-          )}
+        <div className="flex items-center justify-center px-4 py-5 border-b border-surface-border">
+          <Logo size={sidebarOpen ? "md" : "sm"} showText={sidebarOpen} />
         </div>
 
         {/* Nav */}

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Database, Loader2, ArrowLeft } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
+import Logo from "../../components/ui/Logo";
 import toast from "react-hot-toast";
 import { authApi } from "../../lib/api";
 
@@ -24,12 +25,10 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="min-h-screen bg-surface flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#334155_1px,transparent_1px),linear-gradient(to_bottom,#334155_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
       <div className="relative w-full max-w-md animate-slide-up">
         <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 bg-brand-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-brand-600/30">
-            <Database size={28} className="text-white" />
-          </div>
+          <Logo size="lg" />
         </div>
         <div className="card">
           {sent ? (

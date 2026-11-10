@@ -1,7 +1,6 @@
 ﻿import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  Database,
   LayoutDashboard,
   BookOpen,
   History,
@@ -21,6 +20,7 @@ import {
   ClipboardList,
 } from "lucide-react";
 import { useAuthStore } from "../store";
+import Logo from "../components/ui/Logo";
 
 // ── Datos de las secciones ────────────────────────────────
 const NAV_LINKS = [
@@ -194,11 +194,8 @@ export default function HomePage() {
       {/* ── Navbar ── */}
       <header className="sticky top-0 z-50 border-b border-surface-border bg-surface/85 backdrop-blur">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <button onClick={() => go("inicio")} className="flex items-center gap-2.5">
-            <span className="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center shadow-lg shadow-brand-600/30">
-              <Database size={18} className="text-white" />
-            </span>
-            <span className="font-bold text-white">AS/400 Backup</span>
+          <button onClick={() => go("inicio")} aria-label="Ir al inicio">
+            <Logo size="sm" />
           </button>
 
           <nav className="hidden md:flex items-center gap-7">
@@ -263,7 +260,7 @@ export default function HomePage() {
 
       {/* ── Inicio (hero) ── */}
       <section id="inicio" className="relative scroll-mt-20 overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#334155_1px,transparent_1px),linear-gradient(to_bottom,#334155_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-[0.12]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-[0.12]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.18),transparent_60%)]" />
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-16 md:py-24 grid lg:grid-cols-2 gap-14 items-center">
@@ -473,12 +470,7 @@ export default function HomePage() {
       <footer id="contacto" className="scroll-mt-20 border-t border-surface-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 grid md:grid-cols-3 gap-10">
           <div>
-            <div className="flex items-center gap-2.5">
-              <span className="w-9 h-9 bg-brand-600 rounded-xl flex items-center justify-center">
-                <Database size={18} className="text-white" />
-              </span>
-              <span className="font-bold text-white">AS/400 Backup</span>
-            </div>
+            <Logo size="md" />
             <p className="mt-4 text-sm text-slate-500 leading-relaxed">
               Sistema de gestión y backup de journals AS/400 IBM iSeries.
             </p>

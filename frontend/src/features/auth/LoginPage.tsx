@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Database, Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import Logo from "../../components/ui/Logo";
 import toast from "react-hot-toast";
 import { useAuthStore } from "../../store";
 
@@ -34,16 +35,13 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-surface flex items-center justify-center p-4">
       {/* Background grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#334155_1px,transparent_1px),linear-gradient(to_bottom,#334155_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20" />
 
       <div className="relative w-full max-w-md animate-slide-up">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 bg-brand-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-brand-600/30">
-            <Database size={28} className="text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-white">AS/400 Backup</h1>
-          <p className="text-slate-500 text-sm mt-1">Sistema de respaldo empresarial</p>
+          <Logo size="lg" />
+          <p className="text-slate-500 text-sm mt-4">Sistema de respaldo empresarial</p>
         </div>
 
         {/* Card */}

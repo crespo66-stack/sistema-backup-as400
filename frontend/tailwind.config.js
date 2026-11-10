@@ -1,9 +1,13 @@
+import colors from "tailwindcss/colors";
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
+        // Grises neutros (sin tono azulado) para que el tema sea negro puro
+        slate: colors.neutral,
         brand: {
           50:  "#eef2ff",
           100: "#e0e7ff",
@@ -17,10 +21,10 @@ export default {
           900: "#312e81",
         },
         surface: {
-          DEFAULT: "#0f172a",
-          card:    "#1e293b",
-          border:  "#334155",
-          hover:   "#293548",
+          DEFAULT: "#0a0a0a",
+          card:    "#141414",
+          border:  "#262626",
+          hover:   "#1c1c1c",
         },
       },
       fontFamily: {
