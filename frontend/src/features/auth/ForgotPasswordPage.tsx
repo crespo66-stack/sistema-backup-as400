@@ -37,7 +37,8 @@ export default function ForgotPasswordPage() {
                 <span className="text-emerald-400 text-2xl">✓</span>
               </div>
               <h2 className="text-lg font-semibold text-white mb-2">Correo enviado</h2>
-              <p className="text-slate-400 text-sm">Si tu email existe, recibirás un enlace de recuperación.</p>
+              <p className="text-slate-400 text-sm">Si tu email existe, recibirás un enlace de recuperación. Revisa también la carpeta de spam.</p>
+              <p className="text-slate-500 text-xs mt-2">El enlace vence en 60 minutos.</p>
               <Link to="/login" className="btn-primary inline-flex mt-6">Volver al login</Link>
             </div>
           ) : (

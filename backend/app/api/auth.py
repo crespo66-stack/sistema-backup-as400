@@ -1,8 +1,9 @@
-﻿from fastapi import APIRouter, Depends, HTTPException, status
+﻿from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import secrets
 
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import (
     verify_password, get_password_hash,
@@ -14,6 +15,7 @@ from app.schemas import (
     RefreshTokenRequest, PasswordResetRequest, PasswordResetConfirm,
 )
 from app.api.deps import get_current_user
+from app.services.email import send_reset_email
 
 router = APIRouter(prefix="/auth", tags=["Autenticación"])
 
@@ -78,17 +80,22 @@ def refresh_token(body: RefreshTokenRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/forgot-password")
-def forgot_password(body: PasswordResetRequest, db: Session = Depends(get_db)):
-    """Solicitar enlace de recuperación de contraseña."""
+def forgot_password(
+    body: PasswordResetRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    """Solicitar enlace de recuperación de contraseña (se envía por correo)."""
     user = db.query(User).filter(User.email == body.email).first()
-    if user:
+    if user and user.is_active:
         token = secrets.token_urlsafe(32)
         user.reset_token = token
-        user.reset_token_expires = datetime.utcnow() + timedelta(hours=1)
+        user.reset_token_expires = datetime.now(timezone.utc) + timedelta(minutes=settings.RESET_TOKEN_MINUTES)
         db.commit()
-        # TODO: Enviar email con el token
-        # En producción usar: sendgrid, smtp, etc.
-        print(f"[DEV] Reset token para {user.email}: {token}")
+
+        reset_link = f"{settings.FRONTEND_URL.rstrip('/')}/reset-password?token={token}"
+        # El envío va en segundo plano: la respuesta es igual exista o no el email
+        background_tasks.add_task(send_reset_email, user.email, user.full_name, reset_link)
 
     # Siempre retornar 200 para no revelar si el email existe
     return {"message": "Si el email existe, recibirás un enlace de recuperación en breve"}
@@ -100,7 +107,12 @@ def reset_password(body: PasswordResetConfirm, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.reset_token == body.token).first()
     if not user or not user.reset_token_expires:
         raise HTTPException(status_code=400, detail="Token inválido")
-    if datetime.utcnow() > user.reset_token_expires:
+
+    # PostgreSQL devuelve la fecha con zona horaria; SQLite no. Se normaliza a UTC.
+    expires = user.reset_token_expires
+    if expires.tzinfo is None:
+        expires = expires.replace(tzinfo=timezone.utc)
+    if datetime.now(timezone.utc) > expires:
         raise HTTPException(status_code=400, detail="Token expirado. Solicita uno nuevo.")
 
     user.hashed_password    = get_password_hash(body.new_password)

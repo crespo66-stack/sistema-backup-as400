@@ -7,6 +7,7 @@ import DefaultLayout from "../components/layout/DefaultLayout";
 import LoginPage from "../features/auth/LoginPage";
 import RegisterPage from "../features/auth/RegisterPage";
 import ForgotPasswordPage from "../features/auth/ForgotPasswordPage";
+import ResetPasswordPage from "../features/auth/ResetPasswordPage";
 import DashboardPage from "../features/dashboard/DashboardPage";
 import JournalsPage from "../features/journals/JournalsPage";
 import HistoryPage from "../features/history/HistoryPage";
@@ -39,9 +40,9 @@ export default function AppRoutes() {
         position="top-right"
         toastOptions={{
           style: {
-            background: "#1e293b",
-            color: "#f1f5f9",
-            border: "1px solid #334155",
+            background: "#141414",
+            color: "#f5f5f5",
+            border: "1px solid #262626",
           },
         }}
       />
@@ -51,6 +52,7 @@ export default function AppRoutes() {
         <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
         <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
         <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         {/* Protected */}
         <Route

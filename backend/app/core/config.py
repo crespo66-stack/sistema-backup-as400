@@ -25,6 +25,17 @@ class Settings(BaseSettings):
     FIRST_ADMIN_PASSWORD: str = "Admin1234!"
     FIRST_ADMIN_FULLNAME: str = "Administrador del Sistema"
 
+    # ── Correo (recuperación de contraseña) ──────────────
+    # Si SMTP_HOST / SMTP_USER / SMTP_PASSWORD están vacíos, no se envía correo:
+    # el enlace de recuperación solo se imprime en los logs del servidor.
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM: str = ""          # Si está vacío se usa SMTP_USER
+    SMTP_STARTTLS: bool = True   # True para el puerto 587 (Gmail). Con 465 se usa SSL directo
+    RESET_TOKEN_MINUTES: int = 60
+
     class Config:
         env_file = ".env"
         case_sensitive = True
