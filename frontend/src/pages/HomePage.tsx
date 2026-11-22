@@ -13,7 +13,6 @@ import {
   X,
   Check,
   AlertTriangle,
-  Github,
   Lock,
   Server,
   Eye,
@@ -468,7 +467,7 @@ export default function HomePage() {
 
       {/* ── Contacto / pie ── */}
       <footer id="contacto" className="scroll-mt-20 border-t border-surface-border">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 grid md:grid-cols-3 gap-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 grid md:grid-cols-2 gap-10">
           <div>
             <Logo size="md" />
             <p className="mt-4 text-sm text-slate-500 leading-relaxed">
@@ -489,26 +488,9 @@ export default function HomePage() {
             </ul>
           </div>
 
-          <div>
-            <h4 className="text-sm font-semibold text-white">Proyecto formativo</h4>
-            <ul className="mt-4 space-y-2 text-sm text-slate-500">
-              <li>SENA · Ficha 3186677</li>
-              <li>Desarrollado por Guillermo Crespo</li>
-              <li>
-                <a
-                  href="https://github.com/crespo66-stack/sistema-backup-as400"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
-                >
-                  <Github size={16} /> Ver el código en GitHub
-                </a>
-              </li>
-            </ul>
-          </div>
         </div>
         <div className="border-t border-surface-border py-5 text-center text-xs text-slate-600">
-          © 2026 AS/400 Backup · Proyecto educativo
+          © 2026 AS/400 Backup
         </div>
       </footer>
     </div>
