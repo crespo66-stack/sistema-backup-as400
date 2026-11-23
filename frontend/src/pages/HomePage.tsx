@@ -489,8 +489,11 @@ export default function HomePage() {
           </div>
 
         </div>
-        <div className="border-t border-surface-border py-5 text-center text-xs text-slate-600">
-          © 2026 AS/400 Backup
+                <div className="border-t border-surface-border py-5 text-center text-xs text-slate-600">
+          © 2026 AS/400 Backup ·{" "}
+          <Link to="/privacidad" className="hover:text-white transition-colors">
+            Política de privacidad
+          </Link>
         </div>
       </footer>
     </div>

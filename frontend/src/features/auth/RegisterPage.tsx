@@ -14,6 +14,9 @@ const schema = z.object({
   full_name: z.string().min(2, "Nombre requerido"),
   password: z.string().min(8, "Mínimo 8 caracteres"),
   confirmPassword: z.string(),
+  accept: z.boolean().refine((v) => v === true, {
+    message: "Debes aceptar la política de privacidad",
+  }),
 }).refine((d) => d.password === d.confirmPassword, {
   message: "Las contraseñas no coinciden",
   path: ["confirmPassword"],
@@ -27,6 +30,7 @@ export default function RegisterPage() {
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
+    defaultValues: { accept: false },
   });
 
   const onSubmit = async (data: FormData) => {
@@ -88,6 +92,23 @@ export default function RegisterPage() {
               <label className="label">Confirmar contraseña</label>
               <input {...register("confirmPassword")} type="password" className="input" placeholder="••••••••" />
               {errors.confirmPassword && <p className="text-red-400 text-xs mt-1">{errors.confirmPassword.message}</p>}
+            </div>
+            <div>
+              <label className="flex items-start gap-2.5 text-sm text-slate-400 cursor-pointer">
+                <input
+                  {...register("accept")}
+                  type="checkbox"
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-surface-border bg-surface accent-indigo-500"
+                />
+                <span>
+                  Acepto la{" "}
+                  <Link to="/privacidad" target="_blank" className="text-brand-400 hover:text-brand-300 underline">
+                    política de privacidad
+                  </Link>{" "}
+                  y el tratamiento de mis datos personales.
+                </span>
+              </label>
+              {errors.accept && <p className="text-red-400 text-xs mt-1">{errors.accept.message}</p>}
             </div>
             <button type="submit" disabled={loading} className="btn-primary w-full flex items-center justify-center gap-2">
               {loading && <Loader2 size={16} className="animate-spin" />}

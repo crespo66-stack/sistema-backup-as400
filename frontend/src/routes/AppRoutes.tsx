@@ -15,6 +15,7 @@ import AlertsPage from "../features/alerts/AlertsPage";
 import SettingsPage from "../features/settings/SettingsPage";
 import UsersPage from "../features/users/UsersPage";
 import HomePage from "../pages/HomePage";
+import PrivacyPage from "../pages/PrivacyPage";
 
 // Route guard
 function PrivateRoute({ children }: { children: React.ReactNode }) {
@@ -53,6 +54,7 @@ export default function AppRoutes() {
         <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
         <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/privacidad" element={<PrivacyPage />} />
 
         {/* Protected */}
         <Route
